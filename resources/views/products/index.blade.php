@@ -7,19 +7,13 @@
     <div class="hero__glow hero__glow--one" aria-hidden="true"></div>
     <div class="hero__glow hero__glow--two" aria-hidden="true"></div>
     <div class="container">
-        <span class="hero__eyebrow">Welcome to StyleHub</span>
+        <span class="hero__eyebrow">Welcome to My-set</span>
         <h1>Step out in style</h1>
         <p>Fresh sneakers, boots and shirts &mdash; pick your size, color and style, and we'll handle the rest.</p>
-        <div class="hero__stats">
-            <div class="hero__stat">
-                <strong>{{ number_format($products->total()) }}+</strong>
-                <span>Styles</span>
-            </div>
-            <div class="hero__stat-divider" aria-hidden="true"></div>
-            <div class="hero__stat">
-                <strong>{{ $categories->count() }}</strong>
-                <span>Categories</span>
-            </div>
+        <div class="hero__features">
+            <span class="hero__feature hero__feature--primary">🚚 Free shipping</span>
+            <span class="hero__feature hero__feature--accent">⭐ Top rated</span>
+            <span class="hero__feature hero__feature--success">🔒 Secure checkout</span>
         </div>
     </div>
 </section>

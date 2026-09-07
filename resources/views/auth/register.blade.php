@@ -5,7 +5,7 @@
 @section('content')
 <div class="auth-wrapper">
     <h1>Create your account</h1>
-    <p class="subtitle">Join StyleHub to start shopping.</p>
+    <p class="subtitle">Join My-set to start shopping.</p>
 
     <div class="form-card">
         <form method="POST" action="{{ route('register') }}">

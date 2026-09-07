@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin') &mdash; StyleHub Admin</title>
+    <title>@yield('title', 'Admin') &mdash; My-set Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,8 @@
     <header class="site-header">
         <div class="container site-header__inner">
             <a href="{{ route('admin.dashboard') }}" class="brand">
-                <span class="brand__mark">SH</span>
-                StyleHub <span style="color: var(--color-accent); font-weight: 700;">Admin</span>
+                <span class="brand__mark">MS</span>
+                My-set <span style="color: var(--color-accent); font-weight: 700;">Admin</span>
             </a>
 
             <div class="header-actions">

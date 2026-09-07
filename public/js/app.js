@@ -381,7 +381,6 @@
         '</div>' +
         '<div><label>Size</label><input type="text" name="variants[' + i + '][size]" placeholder="e.g. M / 9"></div>' +
         '<div><label>Color</label><input type="text" name="variants[' + i + '][color]" placeholder="e.g. Black"></div>' +
-        '<div><label>Style</label><input type="text" name="variants[' + i + '][style]" placeholder="e.g. Slim Fit"></div>' +
         '<div><label>Stock qty</label><input type="number" name="variants[' + i + '][stock_qty]" min="0" value="0" required data-variant-stock-input><span class="variant-stock-status" data-variant-stock-status></span></div>' +
         '<div><label>Price override</label><input type="number" step="0.01" min="0" name="variants[' + i + '][price_override]" placeholder="optional"></div>' +
         '<div><label>Discount %</label><input type="number" min="0" max="100" name="variants[' + i + '][discount_percent]" placeholder="same as product"></div>' +

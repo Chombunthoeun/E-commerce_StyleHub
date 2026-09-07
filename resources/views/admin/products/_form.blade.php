@@ -64,7 +64,7 @@
 
 <div class="panel">
     <div class="panel__header">
-        <h2>Variants (size / color / style)</h2>
+        <h2>Variants (size / color)</h2>
         <button type="button" class="btn btn-outline btn-sm" data-add-variant>+ Add variant</button>
     </div>
     <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom:14px;">
@@ -91,10 +91,6 @@
                 <div>
                     <label>Color</label>
                     <input type="text" name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}" placeholder="e.g. Black">
-                </div>
-                <div>
-                    <label>Style</label>
-                    <input type="text" name="variants[{{ $i }}][style]" value="{{ $variant['style'] ?? '' }}" placeholder="e.g. Slim Fit">
                 </div>
                 <div>
                     <label>Stock qty</label>

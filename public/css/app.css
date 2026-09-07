@@ -1,5 +1,5 @@
 /* =========================================================
-   StyleHub — base styles
+   My-set — base styles
    ========================================================= */
 
 :root {
@@ -505,42 +505,42 @@ p {
   font-size: 1.08rem;
 }
 
-.hero__stats {
+.hero__features {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hero__feature {
   display: inline-flex;
   align-items: center;
-  gap: 22px;
-  padding: 14px 30px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  gap: 6px;
+  padding: 10px 20px;
   border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
   box-shadow: var(--shadow-sm);
+  transition: transform var(--transition);
 }
 
-.hero__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.2;
+.hero__feature:hover {
+  transform: translateY(-2px);
 }
 
-.hero__stat strong {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--color-text);
+.hero__feature--primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
 }
 
-.hero__stat span {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 600;
+.hero__feature--accent {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: #fff;
 }
 
-.hero__stat-divider {
-  width: 1px;
-  height: 28px;
-  background: var(--color-border);
+.hero__feature--success {
+  background: linear-gradient(135deg, var(--color-success), #0f8a3e);
+  color: #fff;
 }
 
 .page-header {
@@ -2189,6 +2189,29 @@ textarea {
   color: var(--color-primary);
 }
 
+.footer-col--center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.btn-telegram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  gap: 0;
+  border-radius: 50%;
+  line-height: 0;
+}
+
+.btn-telegram svg {
+  display: block;
+}
+
 /* =========================================================
    Animations
    ========================================================= */
@@ -2339,9 +2362,13 @@ textarea {
     display: none;
   }
 
-  .hero__stats {
-    gap: 14px;
-    padding: 12px 20px;
+  .hero__features {
+    gap: 8px;
+  }
+
+  .hero__feature {
+    padding: 8px 14px;
+    font-size: 0.78rem;
   }
 
   .shop-toolbar {

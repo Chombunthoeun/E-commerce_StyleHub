@@ -30,7 +30,6 @@
         </form>
 
         <p class="auth-switch">Don't have an account? <a href="{{ route('register') }}">Sign up</a></p>
-        <p class="auth-switch" style="margin-top:6px; font-size:0.8rem;">Demo admin: admin@example.com / password</p>
     </div>
 </div>
 @endsection
