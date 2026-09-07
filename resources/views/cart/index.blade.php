@@ -20,7 +20,7 @@
                 @foreach($cartItems as $item)
                     <div class="cart-item">
                         <div class="cart-item__media">
-                            <img src="{{ $item->variant->product->imageUrl() }}" alt="{{ $item->variant->product->name }}">
+                            <img src="{{ $item->variant->imageUrl() ?? $item->variant->product->imageUrl() }}" alt="{{ $item->variant->product->name }} — {{ $item->variant->label() ?: 'Standard' }}">
                         </div>
                         <div>
                             <div class="cart-item__name">{{ $item->variant->product->name }}</div>

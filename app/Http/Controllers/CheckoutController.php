@@ -64,6 +64,7 @@ class CheckoutController extends Controller
                     'product_variant_id' => $item->variant->id,
                     'product_name' => $item->variant->product->name,
                     'variant_label' => $item->variant->label(),
+                    'variant_image' => $item->variant->image,
                     'qty' => $item->qty,
                     'price' => $item->variant->price(),
                 ]);

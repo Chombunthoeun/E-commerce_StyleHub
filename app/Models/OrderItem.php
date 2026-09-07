@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['order_id', 'product_id', 'product_variant_id', 'product_name', 'variant_label', 'qty', 'price'])]
+#[Fillable(['order_id', 'product_id', 'product_variant_id', 'product_name', 'variant_label', 'variant_image', 'qty', 'price'])]
 class OrderItem extends Model
 {
     use HasFactory;
@@ -16,6 +16,21 @@ class OrderItem extends Model
         return [
             'price' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Image for this line: the variant photo captured at purchase time,
+     * falling back to the live variant image, then the product image.
+     */
+    public function imageUrl(): string
+    {
+        if ($this->variant_image) {
+            return asset('storage/'.$this->variant_image);
+        }
+
+        return $this->variant?->imageUrl()
+            ?? $this->product?->imageUrl()
+            ?? asset('images/placeholder.svg');
     }
 
     public function order()

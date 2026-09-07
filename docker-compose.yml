@@ -11,6 +11,8 @@ services:
       DB_DATABASE: ${MYSQL_DATABASE:-stylehub}
       DB_USERNAME: ${MYSQL_USER:-stylehub}
       DB_PASSWORD: ${MYSQL_PASSWORD:-stylehub}
+      # Public URL the site is served on (via Cloudflare Tunnel). Set APP_DOMAIN in .env
+      APP_URL: https://${APP_DOMAIN:-localhost:8081}
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
@@ -32,6 +34,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # Cloudflare Tunnel: exposes the app on your domain over HTTPS with no open ports.
+  # Token lives in .env as CLOUDFLARE_TUNNEL_TOKEN (never commit it).
+  # In the Cloudflare Zero Trust dashboard, point the tunnel's Public Hostname
+  # (your domain) at the service  http://app:80
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - app
 
 volumes:
   db_data:

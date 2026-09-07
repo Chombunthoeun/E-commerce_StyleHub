@@ -13,7 +13,10 @@
         <h3 style="margin-bottom:16px;">Items</h3>
         @foreach($order->items as $item)
             <div class="order-line">
-                <span>{{ $item->product_name }} ({{ $item->variant_label ?: 'Standard' }}) &times; {{ $item->qty }}</span>
+                <span style="display:flex; align-items:center; gap:12px;">
+                    <img src="{{ $item->imageUrl() }}" alt="{{ $item->product_name }}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0;">
+                    <span>{{ $item->product_name }} ({{ $item->variant_label ?: 'Standard' }}) &times; {{ $item->qty }}</span>
+                </span>
                 <span>${{ number_format($item->subtotal(), 2) }}</span>
             </div>
         @endforeach

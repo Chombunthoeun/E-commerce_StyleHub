@@ -189,6 +189,15 @@
       });
     }
 
+    // Is there at least one variant matching every option currently set in `partial`?
+    function partialMatch(partial) {
+      return variants.some(function (v) {
+        return Object.keys(partial).every(function (key) {
+          return (v[key] || "") === partial[key];
+        });
+      });
+    }
+
     function refreshButtons() {
       groups.forEach(function (group) {
         var field = group.dataset.optionGroup;
@@ -297,14 +306,42 @@
 
       buttons.forEach(function (btn) {
         btn.addEventListener("click", function () {
-          if (btn.classList.contains("is-unavailable")) return;
-          state[field] = state[field] === btn.dataset.value ? undefined : btn.dataset.value;
-          if (!state[field]) delete state[field];
+          var value = btn.dataset.value;
+
+          if (state[field] === value) {
+            // Clicking the selected option again clears it.
+            delete state[field];
+          } else {
+            // Always honour the click. If the new choice conflicts with other
+            // selected options, drop those so we never submit a stale variant.
+            state[field] = value;
+
+            if (!partialMatch(state)) {
+              Object.keys(state).forEach(function (key) {
+                if (key === field || partialMatch(state)) return;
+                delete state[key];
+              });
+            }
+          }
+
           refreshButtons();
           refreshSummary();
         });
       });
     });
+
+    // Safety net: never let the form post without a resolved variant.
+    if (addForm) {
+      addForm.addEventListener("submit", function (event) {
+        if (!variantIdInput || !variantIdInput.value) {
+          event.preventDefault();
+          if (stockNote) {
+            stockNote.textContent = "Please select all options first";
+            stockNote.className = "stock-note out";
+          }
+        }
+      });
+    }
 
     refreshButtons();
     refreshSummary();

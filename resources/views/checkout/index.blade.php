@@ -46,7 +46,10 @@
             <h3>Order summary</h3>
             @foreach($cartItems as $item)
                 <div class="order-line">
-                    <span>{{ $item->variant->product->name }} ({{ $item->variant->label() ?: 'Standard' }}) &times; {{ $item->qty }}</span>
+                    <span style="display:flex; align-items:center; gap:12px;">
+                        <img src="{{ $item->variant->imageUrl() ?? $item->variant->product->imageUrl() }}" alt="{{ $item->variant->product->name }}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0;">
+                        <span>{{ $item->variant->product->name }} ({{ $item->variant->label() ?: 'Standard' }}) &times; {{ $item->qty }}</span>
+                    </span>
                     <span>${{ number_format($item->subtotal(), 2) }}</span>
                 </div>
             @endforeach
