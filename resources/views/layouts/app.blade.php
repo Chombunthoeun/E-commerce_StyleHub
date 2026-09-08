@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'My-set') &mdash; My-set</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @php($seoDescription = \Illuminate\Support\Facades\View::hasSection('description')
+        ? trim($__env->yieldContent('description'))
+        : 'Fresh sneakers, boots and shirts — pick your size, color and style, and we’ll handle the rest.')
+    @php($canonicalUrl = rtrim(config('app.url'), '/') . (request()->path() === '/' ? '/' : '/' . request()->path()))
+    <meta name="description" content="{{ $seoDescription }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:site_name" content="My-set">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@yield('title', 'My-set')">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta name="twitter:card" content="summary_large_image">
+    @stack('meta')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
