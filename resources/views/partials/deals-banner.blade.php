@@ -1,5 +1,5 @@
 @if(request()->routeIs('home') && $discountedProducts->isNotEmpty())
-    <div class="deals-banner">
+    <div class="deals-banner" id="deals">
         <div class="deals-banner__label">
             <span class="deals-banner__fire">🔥</span>
             <span>Big<br>Discount</span>
