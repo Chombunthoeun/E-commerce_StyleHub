@@ -1,0 +1,158 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Only one deploy at a time; never cancel a deploy that is mid-flight.
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # CI 1 — PHP lint (Pint) + tests (phpunit uses sqlite :memory:, see phpunit.xml)
+  # ---------------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, bcmath, intl, gd, zip, exif, pcntl, pdo_sqlite, sqlite3
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Lint (Laravel Pint)
+        run: ./vendor/bin/pint --test
+
+      - name: Run tests
+        run: php artisan test
+
+  # ---------------------------------------------------------------------------
+  # CI 2 — front-end build (validates Vite / Tailwind compile)
+  # ---------------------------------------------------------------------------
+  build-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+  # ---------------------------------------------------------------------------
+  # CI 3 — Docker image builds (catches Dockerfile breakage before merge)
+  # ---------------------------------------------------------------------------
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image (validation only, not pushed)
+        run: docker build -t website-app:ci .
+
+  # ---------------------------------------------------------------------------
+  # CD — deploy on the laptop via a self-hosted runner.
+  # Runs only on push to main, after all CI jobs pass.
+  # Requires repo secrets: APP_DOMAIN, CLOUDFLARE_TUNNEL_TOKEN, APP_KEY,
+  #                        MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, MYSQL_ROOT_PASSWORD
+  # ---------------------------------------------------------------------------
+  deploy:
+    needs: [test, build-assets, docker-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: [self-hosted]
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      # Pin the compose project so it reuses the SAME volumes (db_data,
+      # storage_data) as a manual `docker compose` run from a folder named
+      # "website-app". Change this only if your manual folder has another name.
+      COMPOSE_PROJECT_NAME: website-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write .env from secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.docker .env
+          cat >> .env <<EOF
+
+          # ---- injected by GitHub Actions (deploy job) ----
+          APP_KEY=${{ secrets.APP_KEY }}
+          APP_DOMAIN=${{ secrets.APP_DOMAIN }}
+          CLOUDFLARE_TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          EOF
+
+      - name: Sanity-check compose config
+        shell: bash
+        run: docker compose config >/dev/null
+
+      - name: Build & start stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose up -d --build --remove-orphans
+          docker compose ps
+
+      - name: Wait for app to be healthy
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 40); do
+            if docker compose exec -T app curl -fsS -o /dev/null http://localhost/up; then
+              echo "app is responding"; exit 0
+            fi
+            echo "waiting for app... ($i/40)"; sleep 3
+          done
+          echo "::error::app did not respond in time"
+          docker compose logs --tail=120 app
+          exit 1
+
+      - name: Check Cloudflare tunnel is connected
+        shell: bash
+        run: |
+          if docker compose logs --tail=200 cloudflared | grep -q "Registered tunnel connection"; then
+            echo "tunnel connected"
+          else
+            echo "::warning::did not see 'Registered tunnel connection' in recent logs — check: docker compose logs cloudflared"
+          fi
+
+      - name: Prune dangling images
+        if: always()
+        shell: bash
+        run: docker image prune -f

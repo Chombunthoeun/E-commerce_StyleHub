@@ -13,6 +13,10 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD:-stylehub}
       # Public URL the site is served on (via Cloudflare Tunnel). Set APP_DOMAIN in .env
       APP_URL: https://${APP_DOMAIN:-localhost:8081}
+      # Stable key across rebuilds for CI/CD. If empty, the app falls back to the
+      # key baked into the image at build time (which changes every rebuild and
+      # would log everyone out). Set APP_KEY in .env / GitHub secret. See CI-CD.md
+      APP_KEY: ${APP_KEY:-}
     volumes:
       - storage_data:/var/www/html/storage
     depends_on:
