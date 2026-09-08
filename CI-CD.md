@@ -101,7 +101,8 @@ on your machine. Docker Desktop must be running for the deploy job to work.
 ## 3. Requirements on the runner machine
 
 - **Docker Desktop** installed and running.
-- **Git for Windows** (gives the runner `bash`, which the deploy steps use via `shell: bash`).
+- **Git for Windows** (needed by `actions/checkout`). The deploy steps themselves run in
+  **Windows PowerShell**, not bash.
 - Enough disk for image builds (a few GB).
 - The tunnel is created and has a **Public Hostname → `app:80`** already (see
   `DEPLOY-CLOUDFLARE.md`). CD does not configure Cloudflare, only restarts the stack.

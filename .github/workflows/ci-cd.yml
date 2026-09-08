@@ -98,61 +98,62 @@ jobs:
       # storage_data) as a manual `docker compose` run from a folder named
       # "website-app". Change this only if your manual folder has another name.
       COMPOSE_PROJECT_NAME: website-app
+    # Windows self-hosted runner -> use Windows PowerShell for every step
+    # (it is always present; `bash` on Windows may resolve to WSL and mangle paths).
+    defaults:
+      run:
+        shell: powershell
     steps:
       - uses: actions/checkout@v4
 
       - name: Write .env from secrets
-        shell: bash
+        env:
+          SECRET_APP_KEY: ${{ secrets.APP_KEY }}
+          SECRET_APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
+          SECRET_CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+          SECRET_MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          SECRET_MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          SECRET_MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          SECRET_MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          set -euo pipefail
-          cp .env.docker .env
-          cat >> .env <<EOF
-
-          # ---- injected by GitHub Actions (deploy job) ----
-          APP_KEY=${{ secrets.APP_KEY }}
-          APP_DOMAIN=${{ secrets.APP_DOMAIN }}
-          CLOUDFLARE_TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-          MYSQL_USER=${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
-          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-          EOF
+          Copy-Item .env.docker .env -Force
+          Add-Content .env "" -Encoding ascii
+          Add-Content .env "# ---- injected by GitHub Actions (deploy job) ----" -Encoding ascii
+          foreach ($k in 'APP_KEY','APP_DOMAIN','CLOUDFLARE_TUNNEL_TOKEN','MYSQL_DATABASE','MYSQL_USER','MYSQL_PASSWORD','MYSQL_ROOT_PASSWORD') {
+            $v = [Environment]::GetEnvironmentVariable("SECRET_$k")
+            Add-Content .env "$k=$v" -Encoding ascii
+          }
 
       - name: Sanity-check compose config
-        shell: bash
-        run: docker compose config >/dev/null
+        run: docker compose config | Out-Null
 
-      - name: Build & start stack
-        shell: bash
+      - name: Build and start stack
         run: |
-          set -euo pipefail
           docker compose up -d --build --remove-orphans
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           docker compose ps
 
       - name: Wait for app to be healthy
-        shell: bash
         run: |
-          set -euo pipefail
-          for i in $(seq 1 40); do
-            if docker compose exec -T app curl -fsS -o /dev/null http://localhost/up; then
-              echo "app is responding"; exit 0
-            fi
-            echo "waiting for app... ($i/40)"; sleep 3
-          done
-          echo "::error::app did not respond in time"
+          for ($i = 1; $i -le 40; $i++) {
+            docker compose exec -T app curl -fsS -o /dev/null http://localhost/up
+            if ($LASTEXITCODE -eq 0) { Write-Host "app is responding"; exit 0 }
+            Write-Host "waiting for app... ($i/40)"
+            Start-Sleep -Seconds 3
+          }
+          Write-Host "::error::app did not respond in time"
           docker compose logs --tail=120 app
           exit 1
 
       - name: Check Cloudflare tunnel is connected
-        shell: bash
         run: |
-          if docker compose logs --tail=200 cloudflared | grep -q "Registered tunnel connection"; then
-            echo "tunnel connected"
-          else
-            echo "::warning::did not see 'Registered tunnel connection' in recent logs — check: docker compose logs cloudflared"
-          fi
+          $logs = docker compose logs --tail=200 cloudflared | Out-String
+          if ($logs -match "Registered tunnel connection") {
+            Write-Host "tunnel connected"
+          } else {
+            Write-Host "::warning::did not see 'Registered tunnel connection' in recent logs - check: docker compose logs cloudflared"
+          }
 
       - name: Prune dangling images
         if: always()
-        shell: bash
         run: docker image prune -f
