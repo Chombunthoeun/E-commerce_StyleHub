@@ -16,7 +16,7 @@
             <div class="media-shimmer" data-media-shimmer></div>
             <img src="{{ $product->imageUrl() }}" alt="{{ $product->name }}" class="media-img is-active" data-media-img>
             <img alt="{{ $product->name }}" class="media-img" data-media-img aria-hidden="true">
-            <span class="media-zoom-hint">🔍 Click to enlarge</span>
+            <span class="media-zoom-hint">🔍 Click to enlarges</span>
         </div>
 
         <div class="product-detail__info">
