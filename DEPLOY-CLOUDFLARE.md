@@ -63,12 +63,12 @@ Then open `https://your-domain.com`.
 
 - **Keep it running:** set Docker Desktop to _Start on login_, disable laptop sleep
   (`Settings → System → Power`), or the site drops when you close the lid.
-- **Stop exposing port 8081 publicly:** it's still bound on the laptop for local
+- **Stop exposing port 8082 publicly:** it's still bound on the laptop for local
   testing. That's fine on a home network. If you don't want it, delete the
   `ports:` block under `app` — the tunnel doesn't need it.
 - **Force HTTPS cookies** once you're only using the domain: add
   `SESSION_SECURE_COOKIE: "true"` under `app.environment` (breaks plain
-  `http://localhost:8081`, so only do this when you've stopped using that).
+  `http://localhost:8082`, so only do this when you've stopped using that).
 - **Uploaded images** (product/variant photos) live in the `storage_data` Docker
   volume. They survive `up --build` but not `docker compose down -v`. Back that
   volume up, or move uploads to Cloudflare R2 / S3 later.
