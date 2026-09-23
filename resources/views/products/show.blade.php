@@ -109,7 +109,7 @@
 
     @if($related->isNotEmpty())
         <section class="related-section">
-            <h2>You might also like</h2>
+            <h2>You might also likes</h2>
             <div class="product-grid">
                 @foreach($related as $item)
                     <a href="{{ route('products.show', $item->slug) }}" class="product-card">
