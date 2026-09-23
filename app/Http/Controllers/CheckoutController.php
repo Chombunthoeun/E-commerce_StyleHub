@@ -32,6 +32,7 @@ class CheckoutController extends Controller
             'shipping_name' => ['required', 'string', 'max:255'],
             'shipping_address' => ['required', 'string', 'max:255'],
             'shipping_phone' => ['required', 'string', 'max:50'],
+            'payment_method' => ['required', 'in:cod,khqr'],
         ]);
 
         $cartItems = $request->user()->cartItems()->with('variant.product')->get();
@@ -51,6 +52,8 @@ class CheckoutController extends Controller
             $order = Order::create([
                 'user_id' => $request->user()->id,
                 'status' => 'Pending',
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => 'unpaid',
                 'total' => $cartItems->sum(fn (CartItem $item) => $item->subtotal()),
                 'shipping_name' => $validated['shipping_name'],
                 'shipping_address' => $validated['shipping_address'],
@@ -76,6 +79,10 @@ class CheckoutController extends Controller
             return $order;
         });
 
-        return redirect()->route('orders.show', $order)->with('status', 'Order placed successfully!');
+        $message = $order->isKhqr()
+            ? 'Order placed! Scan the KHQR code below to pay, then upload your payment screenshot.'
+            : 'Order placed successfully! You will pay in cash when your order arrives.';
+
+        return redirect()->route('orders.show', $order)->with('status', $message);
     }
 }

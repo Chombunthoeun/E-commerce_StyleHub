@@ -23,6 +23,7 @@
             @endforeach
         </div>
 
+        <div>
         <div class="summary-card">
             <h3>Shipping details</h3>
             <p style="color: var(--color-text-muted); font-size: 0.9rem;">
@@ -34,6 +35,9 @@
                 <span>Total</span>
                 <span>${{ number_format($order->total, 2) }}</span>
             </div>
+        </div>
+
+        @include('orders._payment')
         </div>
     </div>
 </div>

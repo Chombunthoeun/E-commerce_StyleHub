@@ -34,8 +34,28 @@
                     </p>
                 @endunless
 
+                <div class="form-group">
+                    <label>Payment method</label>
+                    <div class="pay-options">
+                        <label class="pay-option">
+                            <input type="radio" name="payment_method" value="khqr" @checked(old('payment_method', 'khqr') === 'khqr') required>
+                            <span>
+                                <strong>Pay now with KHQR</strong>
+                                <small>Scan with ACLEDA, ABA, Wing or any KHQR bank app, then upload your payment screenshot.</small>
+                            </span>
+                        </label>
+                        <label class="pay-option">
+                            <input type="radio" name="payment_method" value="cod" @checked(old('payment_method') === 'cod')>
+                            <span>
+                                <strong>Cash on delivery</strong>
+                                <small>Pay in cash when you receive your order.</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
                 <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 20px;">
-                    This is a demo checkout &mdash; no payment is collected. Placing the order will reserve stock and create an order you can track under "My Orders".
+                    Placing the order reserves your items. You can track it under "My Orders".
                 </p>
 
                 <button type="submit" class="btn btn-accent btn-block">Place order &mdash; ${{ number_format($total, 2) }}</button>

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id', 'status', 'total', 'shipping_name', 'shipping_address', 'shipping_phone'])]
+#[Fillable(['user_id', 'status', 'payment_method', 'payment_status', 'payment_proof', 'payment_submitted_at', 'total', 'shipping_name', 'shipping_address', 'shipping_phone'])]
 class Order extends Model
 {
     use HasFactory;
@@ -15,6 +15,7 @@ class Order extends Model
     {
         return [
             'total' => 'decimal:2',
+            'payment_submitted_at' => 'datetime',
         ];
     }
 
@@ -26,6 +27,43 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function isKhqr(): bool
+    {
+        return $this->payment_method === 'khqr';
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return $this->isKhqr() ? 'KHQR (ACLEDA)' : 'Cash on delivery';
+    }
+
+    public function paymentStatusLabel(): string
+    {
+        return match ($this->payment_status) {
+            'submitted' => 'Awaiting review',
+            'paid' => 'Paid',
+            'rejected' => 'Proof rejected',
+            default => 'Unpaid',
+        };
+    }
+
+    public function paymentStatusColor(): string
+    {
+        return match ($this->payment_status) {
+            'submitted' => 'blue',
+            'paid' => 'green',
+            'rejected' => 'red',
+            default => 'amber',
+        };
+    }
+
+    public function canUploadPaymentProof(): bool
+    {
+        return $this->isKhqr()
+            && in_array($this->payment_status, ['unpaid', 'submitted', 'rejected'], true)
+            && $this->status !== 'Cancelled';
     }
 
     public function statusColor(): string

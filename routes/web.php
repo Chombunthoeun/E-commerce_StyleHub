@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/payment-proof', [OrderController::class, 'uploadPaymentProof'])->middleware('throttle:10,1')->name('orders.payment-proof.store');
+    Route::get('/orders/{order}/payment-proof', [OrderController::class, 'paymentProof'])->name('orders.payment-proof');
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
@@ -48,4 +50,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+    Route::patch('/orders/{order}/payment', [AdminOrderController::class, 'updatePayment'])->name('orders.payment.update');
+    Route::get('/orders/{order}/payment-proof', [AdminOrderController::class, 'paymentProof'])->name('orders.payment-proof');
 });

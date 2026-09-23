@@ -24,7 +24,7 @@
                     </div>
                     <span class="status-badge status-{{ $order->statusColor() }}">{{ $order->status }}</span>
                 </div>
-                <div style="color: var(--color-text-muted); font-size: 0.9rem;">{{ $order->items->count() }} item(s) &mdash; ${{ number_format($order->total, 2) }}</div>
+                <div style="color: var(--color-text-muted); font-size: 0.9rem;">{{ $order->items->count() }} item(s) &mdash; ${{ number_format($order->total, 2) }} &middot; {{ $order->paymentMethodLabel() }}: {{ $order->paymentStatusLabel() }}</div>
             </a>
         @endforeach
     @endif
